@@ -1,0 +1,10 @@
+*.swp
+*.swo
+*.pyc
+*__pycache__*
+data/
+dist/
+build/
+rllab.egg-info/
+err.log
+out.log
