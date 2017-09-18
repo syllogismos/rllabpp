@@ -111,7 +111,7 @@ class DDPG(RLAlgorithm, Poleval):
     def start_worker(self):
         parallel_sampler.populate_task(self.env, self.exec_policy)
 
-    def save(self, checkpoint_dir=None):
+    def save(self, checkpoint_dir=None, itr=0):
         if checkpoint_dir is None: checkpoint_dir = logger.get_snapshot_dir()
 
         pool_file = os.path.join(checkpoint_dir, 'pool.chk')
@@ -124,8 +124,8 @@ class DDPG(RLAlgorithm, Poleval):
 
         checkpoint_file = os.path.join(checkpoint_dir, 'params.chk')
         sess = tf.get_default_session()
-        saver = tf.train.Saver()
-        saver.save(sess, checkpoint_file)
+        saver = tf.train.Saver(max_to_keep=200)
+        saver.save(sess, checkpoint_file, global_step=itr)
 
         tabular_file = os.path.join(checkpoint_dir, 'progress.csv')
         if os.path.isfile(tabular_file):
@@ -136,10 +136,12 @@ class DDPG(RLAlgorithm, Poleval):
 
     def restore(self, checkpoint_dir=None):
         if checkpoint_dir is None: checkpoint_dir = logger.get_snapshot_dir()
-        checkpoint_file = os.path.join(checkpoint_dir, 'params.chk')
-        if os.path.isfile(checkpoint_file + '.meta'):
+        # checkpoint_file = os.path.join(checkpoint_dir, 'params.chk')
+        checkpoint_file = tf.train.latest_checkpoint(checkpoint_dir)
+        logger.log('loading checkpoint from %s'%checkpoint_file)
+        if checkpoint_file is not None and os.path.isfile(str(checkpoint_file) + '.meta'):
             sess = tf.get_default_session()
-            saver = tf.train.Saver()
+            saver = tf.train.Saver(max_to_keep=200)
             saver.restore(sess, checkpoint_file)
 
             tabular_chk_file = os.path.join(checkpoint_dir, 'progress.csv.chk')
@@ -151,7 +153,7 @@ class DDPG(RLAlgorithm, Poleval):
 
             pool_file = os.path.join(checkpoint_dir, 'pool.chk')
             if self.save_format == 'pickle':
-                pickle_load(pool_file)
+                self.pool = pickle_load(pool_file)
             elif self.save_format == 'joblib':
                 self.pool = joblib.load(pool_file)
             else: raise NotImplementedError
@@ -253,7 +255,7 @@ class DDPG(RLAlgorithm, Poleval):
                 logger.dump_tabular(with_prefix=False)
                 logger.pop_prefix()
                 epoch = sess.run(increment_global_epoch_op)
-                if self.save_freq > 0 and (epoch-1) % self.save_freq == 0: self.save()
+                if self.save_freq > 0 and (epoch-1) % self.save_freq == 0: self.save(itr=epoch)
             self.env.terminate()
             self.exec_policy.terminate()
 
