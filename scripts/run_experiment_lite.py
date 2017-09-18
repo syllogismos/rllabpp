@@ -1,6 +1,8 @@
 import sys
 
 sys.path.append(".")
+sys.path = ["/home/ubuntu/rllabplusplus"] + sys.path
+print(sys.path)
 
 from rllab.misc.ext import is_iterable, set_seed
 from rllab.misc.instrument import concretize
