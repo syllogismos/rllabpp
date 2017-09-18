@@ -21,6 +21,7 @@ def set_experiment(mode="local", keys=None, params=dict()):
     info, _ = get_env_info(**flags)
     max_path_length = info['horizon']
     n_itr = int(np.ceil(float(n_episodes*max_path_length)/flags['batch_size']))
+    print('No of iteration are %s'%n_itr)
 
     exp_prefix='%s'%(flags["exp"])
     exp_name=get_annotations_string(keys=keys, **flags)
