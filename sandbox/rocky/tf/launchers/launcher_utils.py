@@ -26,6 +26,12 @@ flags.DEFINE_boolean('restore_auto', True, 'Restore params if checkpoint is avai
 flags.DEFINE_string('env_name', 'HalfCheetah-v1', 'Environment.')
 flags.DEFINE_float('discount', 0.99, 'Discount.')
 
+# runenv params
+flags.DEFINE_integer('difficulty', 2, 'Difficulty of RunEnv Instance')
+flags.DEFINE_boolean('visualize', False, 'Visualization of RunEnv')
+flags.DEFINE_integer('runenv_seed', None, 'RunEnv Seed')
+flags.DEFINE_integer('max_obstacles', 3, 'Number of obstacles')
+
 # learning params
 flags.DEFINE_float('learning_rate', 0.001, 'Base learning rate.')
 flags.DEFINE_integer('batch_size', 5000, 'Batch size.')
@@ -243,7 +249,10 @@ def get_annotations_string(**kwargs):
     return annotations_str
 
 def get_env(record_video=True, record_log=True, env_name=None, normalize_obs=False, **kwargs):
-    env = TfEnv(normalize(GymEnv(env_name, record_video=record_video,
+    if env_name == 'RunEnv':
+        env = TfEnv(normalize(GymEnv(env_name, difficulty=kwargs['difficulty'], runenv_seed=kwargs['runenv_seed'], visualize=kwargs['visualize'], record_log=False, record_video=False)))
+    else:
+        env = TfEnv(normalize(GymEnv(env_name, record_video=record_video,
         record_log=record_log), normalize_obs=normalize_obs))
     return env
 
