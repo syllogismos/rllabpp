@@ -5,6 +5,8 @@ import gym.spaces
 import traceback
 import logging
 
+from osim.env import RunEnv
+
 try:
     from gym.wrappers.monitoring import logger as monitor_logger
 
@@ -56,8 +58,9 @@ class NoVideoSchedule(object):
 
 
 class GymEnv(Env, Serializable):
-    def __init__(self, env_name, record_video=True, video_schedule=None, log_dir=None, record_log=True,
-                 force_reset=False):
+    def __init__(self, env_name, record_video=True, video_schedule=None,
+            log_dir=None, record_log=True, force_reset=False, visualize=False,
+            runenv_seed=None, difficulty=2, max_obstacles=3):
         if log_dir is None:
             if logger.get_snapshot_dir() is None:
                 logger.log("Warning: skipping Gym environment monitoring since snapshot_dir not configured.")
@@ -65,9 +68,18 @@ class GymEnv(Env, Serializable):
                 log_dir = os.path.join(logger.get_snapshot_dir(), "gym_log")
         Serializable.quick_init(self, locals())
 
-        env = gym.envs.make(env_name)
+        if env_name == 'RunEnv':
+            env = RunEnv(visualize=visualize)
+        else:
+            env = gym.envs.make(env_name)
         self.env = env
         self.env_id = env.spec.id
+
+        self.visualize = visualize
+        self.runenv_seed = runenv_seed
+        self.difficulty = difficulty
+        self.max_obstacles = max_obstacles
+        self.env_name = env_name
 
         assert not (not record_log and record_video)
 
@@ -79,14 +91,18 @@ class GymEnv(Env, Serializable):
             else:
                 if video_schedule is None:
                     video_schedule = CappedCubicVideoSchedule()
-            self.env = gym.wrappers.Monitor(self.env, log_dir, video_callable=video_schedule, force=True)
+            if env_name != 'RunEnv':
+                self.env = gym.wrappers.Monitor(self.env, log_dir, video_callable=video_schedule, force=True)
             self.monitoring = True
 
         self._observation_space = convert_gym_space(env.observation_space)
         logger.log("observation space: {}".format(self._observation_space))
         self._action_space = convert_gym_space(env.action_space)
         logger.log("action space: {}".format(self._action_space))
-        self._horizon = env.spec.tags['wrapper_config.TimeLimit.max_episode_steps']
+        if env_name == 'RunEnv':
+            self._horizon = env.horizon
+        else:
+             self._horizon = env.spec.tags['wrapper_config.TimeLimit.max_episode_steps']
         self._log_dir = log_dir
         self._force_reset = force_reset
 
@@ -102,14 +118,17 @@ class GymEnv(Env, Serializable):
     def horizon(self):
         return self._horizon
 
-    def reset(self):
-        if self._force_reset and self.monitoring:
+    def reset(self, seed=None):
+        if self._force_reset and self.monitoring and self.env_name != 'RunEnv':
             from gym.wrappers.monitoring import Monitor
             assert isinstance(self.env, Monitor)
             recorder = self.env.stats_recorder
             if recorder is not None:
                 recorder.done = True
-        return self.env.reset()
+        if self.env_name == 'RunEnv':
+            return self.env.reset(difficulty=self.difficulty, seed=seed)
+        else:
+            return self.env.reset()
 
     def step(self, action):
         next_obs, reward, done, info = self.env.step(action)
@@ -131,3 +150,4 @@ class GymEnv(Env, Serializable):
 
     ***************************
                 """ % self._log_dir)
+
