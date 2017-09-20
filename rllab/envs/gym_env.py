@@ -128,7 +128,7 @@ class GymEnv(Env, Serializable):
                 recorder.done = True
         if self.env_name == 'RunEnv':
             runenv_seed = random.randint(0, 100000000)
-            print(runenv_seed, "runenv seed ~~~~~~~~~~~~~@@@~~~~~~~~~~~~~")
+            logger.log("********** runenv reset seed: {}".format(runenv_seed))
             return self.env.reset(difficulty=self.difficulty, seed=runenv_seed)
         else:
             return self.env.reset()
