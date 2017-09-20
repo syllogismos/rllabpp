@@ -38,6 +38,8 @@ def get_nonlinearity(name):
         return tf.nn.relu
     elif name == 'tanh':
         return tf.nn.tanh
+    elif name == 'runenv_act':
+        return lambda x: (tf.nn.tanh(x) + 1.0)/2.0
     elif name =="None" or name is None:
         return None
     else: raise NotImplementedError(name)
