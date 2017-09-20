@@ -4,6 +4,7 @@ import gym.envs
 import gym.spaces
 import traceback
 import logging
+import random
 
 from osim.env import RunEnv
 
@@ -126,7 +127,9 @@ class GymEnv(Env, Serializable):
             if recorder is not None:
                 recorder.done = True
         if self.env_name == 'RunEnv':
-            return self.env.reset(difficulty=self.difficulty, seed=seed)
+            runenv_seed = random.randint(0, 100000000)
+            print(runenv_seed, "runenv seed ~~~~~~~~~~~~~@@@~~~~~~~~~~~~~")
+            return self.env.reset(difficulty=self.difficulty, seed=runenv_seed)
         else:
             return self.env.reset()
 
