@@ -39,10 +39,13 @@ def get_nonlinearity(name):
     elif name == 'tanh':
         return tf.nn.tanh
     elif name == 'runenv_act':
-        return lambda x: (tf.nn.tanh(x) + 1.0)/2.0
+        return bound_policy_output
     elif name =="None" or name is None:
         return None
     else: raise NotImplementedError(name)
+
+def bound_policy_output(x):
+    return (tf.nn.tanh(x) + 1.0)/2.0
 
 def get_hidden_sizes(sizes_string):
     return [int(x) for x in sizes_string.split('x')]
