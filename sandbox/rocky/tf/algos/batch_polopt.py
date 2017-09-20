@@ -123,6 +123,8 @@ class BatchPolopt(RLAlgorithm, Poleval):
             if self.policy.vectorized and not force_batch_sampler:
                 sampler_cls = VectorizedSampler
             else:
+                print("Using BatchSampler")
+                print("*****************************")
                 sampler_cls = BatchSampler
         if sampler_args is None:
             sampler_args = dict()

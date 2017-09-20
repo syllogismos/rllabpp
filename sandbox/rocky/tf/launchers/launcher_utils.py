@@ -21,7 +21,8 @@ flags.DEFINE_boolean('overwrite', False, 'Overwrite logs by default.')
 flags.DEFINE_boolean('force_start', False, 'Force start all.')
 flags.DEFINE_integer('save_freq', 0, 'Save checkpoint frequency.')
 flags.DEFINE_boolean('restore_auto', True, 'Restore params if checkpoint is available.')
-
+flags.DEFINE_boolean('force_batch_sampler', True, 'Force Batch sampler instead vecotrizer sampler')
+flags.DEFINE_integer('n_parallel', 1, 'No of parallel threads for Batch sampling')
 # environment params
 flags.DEFINE_string('env_name', 'HalfCheetah-v1', 'Environment.')
 flags.DEFINE_float('discount', 0.99, 'Discount.')

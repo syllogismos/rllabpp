@@ -47,13 +47,14 @@ def set_experiment(mode="local", keys=None, params=dict()):
             exp_name=exp_name,
             mode=mode,
             seed=flags["seed"],
+            n_parallel=flags["n_parallel"]
             )
 
 def run_experiment(**kwargs):
     algo, run_kwargs = set_experiment(**kwargs)
     run_experiment_lite(
         algo.train(),
-        n_parallel=1,
+        # n_parallel=1, # added this in flags
         snapshot_mode="last_best",
         terminate_machine=True,
         sync_s3_pkl=True,

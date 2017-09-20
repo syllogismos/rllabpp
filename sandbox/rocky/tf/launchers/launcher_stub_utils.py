@@ -295,6 +295,9 @@ def get_algo(env, policy, es, qf, baseline, max_path_length,
     qf_baseline = None
     extra_kwargs = dict()
 
+    if 'force_batch_sampler' in kwargs:
+        extra_kwargs['force_batch_sampler'] = kwargs['force_batch_sampler']
+
     print('Creating algo=%s with n_itr=%d, max_path_length=%d...'%(
         algo_name, n_itr, max_path_length))
     if algo_name in [
