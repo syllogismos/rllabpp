@@ -165,14 +165,14 @@ class GaussianMLPPolicy(StochasticPolicy, LayersPowered, Serializable):
         flat_obs = self.observation_space.flatten(observation)
         mean, log_std = [x[0] for x in self._f_dist([flat_obs])]
         rnd = np.random.normal(size=mean.shape)
-        action = np.clip(rnd * np.exp(log_std) + mean, 0.0, 1.0)
+        action = rnd * np.exp(log_std) + mean
         return action, dict(mean=mean, log_std=log_std)
 
     def get_actions(self, observations):
         flat_obs = self.observation_space.flatten_n(observations)
         means, log_stds = self._f_dist(flat_obs)
         rnd = np.random.normal(size=means.shape)
-        actions = np.clip(rnd * np.exp(log_stds) + means, 0.0, 1.0)
+        actions = rnd * np.exp(log_stds) + means
         return actions, dict(mean=means, log_std=log_stds)
 
     def get_reparam_action_sym(self, obs_var, action_var, old_dist_info_vars):

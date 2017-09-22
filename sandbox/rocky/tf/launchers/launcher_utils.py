@@ -251,7 +251,9 @@ def get_annotations_string(**kwargs):
 
 def get_env(record_video=True, record_log=True, env_name=None, normalize_obs=False, **kwargs):
     if env_name == 'RunEnv':
-        env = TfEnv(normalize(GymEnv(env_name, difficulty=kwargs['difficulty'], runenv_seed=kwargs['runenv_seed'], visualize=kwargs['visualize'], record_log=False, record_video=False)))
+        env = TfEnv(normalize(GymEnv(env_name, difficulty=kwargs['difficulty'],
+        runenv_seed=kwargs['runenv_seed'], visualize=kwargs['visualize'],
+        record_log=False, record_video=False), normalize_obs=normalize_obs))
     else:
         env = TfEnv(normalize(GymEnv(env_name, record_video=record_video,
         record_log=record_log), normalize_obs=normalize_obs))
