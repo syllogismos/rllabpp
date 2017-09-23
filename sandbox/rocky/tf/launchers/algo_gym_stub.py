@@ -3,10 +3,12 @@ from sandbox.rocky.tf.launchers.launcher_stub_utils import get_env, get_policy, 
 from rllab.misc.instrument import run_experiment_lite
 from rllab import config
 import os.path as osp
-import sys
+import sys, os
 import tensorflow as tf
 from copy import deepcopy
 import numpy as np
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 def set_experiment(mode="local", keys=None, params=dict()):
     flags = FLAGS.__flags

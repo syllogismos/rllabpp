@@ -7,7 +7,7 @@ import urllib.parse as urlparse
 import numpy as np
 from runenv.helpers import Scaler
 import multiprocessing
-import pickle
+import pickle, os
 import random
 import tensorflow as tf
 
@@ -15,6 +15,8 @@ from rllab.sampler.utils import rollout
 from rllab.envs.gym_env import GymEnv
 from rllab.envs.normalized_env import normalize
 from sandbox.rocky.tf.envs.base import TfEnv
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 PORT_NUMBER = 8018
