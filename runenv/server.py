@@ -33,7 +33,7 @@ def dump_episodes(env_name, difficulty,
     p.join()
     paths = sum(paths, [])
     episodes_file = chk_dir + '/episodes_latest'
-    pickle.dump(tras, open(episodes_file, 'wb'))
+    pickle.dump(paths, open(episodes_file, 'wb'))
 
 def get_paths_from_latest_policy(pickled_obj):
     """
