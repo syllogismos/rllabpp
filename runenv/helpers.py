@@ -1,5 +1,5 @@
 import numpy as np
-import subprocess, psutil
+import subprocess, psutil, time
 
 
 class Scaler(object):
@@ -58,6 +58,7 @@ def start_env_server(p=0, ec2=True):
     http_server_path = '/home/ubuntu/rllabpp/runenv/server.py'
     command = http_server_path + ' --port ' + port
     process = subprocess.Popen(command, shell=True)
+    time.sleep(5)
     return process.pid
 
 
@@ -72,3 +73,4 @@ def destroy_env_server(pid):
     except:
         print("process doesnt exist", pid)
         pass
+    time.sleep(5)

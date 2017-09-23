@@ -29,6 +29,9 @@ class NormalizedEnv(ProxyEnv, Serializable):
         self._reward_alpha = reward_alpha
         self._reward_mean = 0.
         self._reward_var = 1.
+        self.env_name = self.wrapped_env.env_name
+        self.difficulty = self.wrapped_env.difficulty
+        self.max_obstacles = self.wrapped_env.max_obstacles
 
     def _update_obs_estimate(self, obs):
         flat_obs = self.wrapped_env.observation_space.flatten(obs)

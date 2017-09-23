@@ -3,7 +3,8 @@ from rllab.misc import tensor_utils
 import time
 
 def rollout(env, agent, max_path_length=np.inf, animated=False, speedup=1,
-            always_return_paths=False):
+            always_return_paths=False, scaler=None):
+    unscaled_obs = []
     observations = []
     actions = []
     rewards = []
@@ -13,12 +14,20 @@ def rollout(env, agent, max_path_length=np.inf, animated=False, speedup=1,
     o = env.reset()
     agent.reset()
     path_length = 0
+    if scaler is not None:
+        scale, offset = scaler.get()
+    else:
+        scale = [1.0]*env.observation_space.shape[0]
+        offset = [0.0]*env.observation_space.shape[0]
     if animated:
         env.render()
     while path_length < max_path_length:
-        a, agent_info = agent.get_action(o)
+        o = env.observation_space.flatten(o)
+        unscaled_obs.append(o)
+        obs = (o - offset) * scale
+        observations.append(obs)
+        a, agent_info = agent.get_action(obs)
         next_o, r, d, env_info = env.step(a)
-        observations.append(env.observation_space.flatten(o))
         rewards.append(r)
         terminals.append(d)
         actions.append(env.action_space.flatten(a))
@@ -36,6 +45,7 @@ def rollout(env, agent, max_path_length=np.inf, animated=False, speedup=1,
         return
 
     return dict(
+        unscaled_obs=tensor_utils.stack_tensor_list(unscaled_obs),
         observations=tensor_utils.stack_tensor_list(observations),
         actions=tensor_utils.stack_tensor_list(actions),
         rewards=tensor_utils.stack_tensor_list(rewards),

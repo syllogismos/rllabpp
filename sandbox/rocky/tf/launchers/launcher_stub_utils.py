@@ -302,6 +302,8 @@ def get_algo(env, policy, es, qf, baseline, max_path_length,
 
     if 'force_batch_sampler' in kwargs:
         extra_kwargs['force_batch_sampler'] = kwargs['force_batch_sampler']
+    if 'n_parallel' in kwargs:
+        extra_kwargs['n_parallel'] = kwargs['n_parallel']
 
     print('Creating algo=%s with n_itr=%d, max_path_length=%d...'%(
         algo_name, n_itr, max_path_length))

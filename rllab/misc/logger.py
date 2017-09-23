@@ -244,7 +244,7 @@ def save_itr_params(itr, params):
             last_file_name = osp.join(_snapshot_dir, 'params.pkl')
             joblib.dump(params, file_name, compress=3)
             joblib.dump(params, last_file_name, compress=3)
-        elif _snapshot_mode == 'last':
+        elif _snapshot_mode == 'last' or itr == 0:
             # override previous params
             file_name = osp.join(_snapshot_dir, 'params.pkl')
             joblib.dump(params, file_name, compress=3)

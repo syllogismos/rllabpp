@@ -12,9 +12,12 @@ from rllab.pool.simple_pool import SimpleReplayPool
 from sandbox.rocky.tf.misc.common_utils import memory_usage_resource
 from sandbox.rocky.tf.misc.common_utils import pickle_load, pickle_dump
 import gc
-import joblib
+import joblib, pickle
 from sandbox.rocky.tf.algos.poleval import Poleval
 from rllab.sampler.utils import rollout
+from runenv.helpers import Scaler
+import urllib, http.client, json
+from runenv.helpers import start_env_server, destroy_env_server
 
 class BatchPolopt(RLAlgorithm, Poleval):
     """
@@ -98,6 +101,9 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.whole_paths = whole_paths
         self.fixed_horizon = fixed_horizon
         self.qf = qf
+        self.n_parallel = kwargs['n_parallel']
+        print(self.n_parallel)
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
         if self.qf is not None:
             self.qprop = qprop
             self.qf_updates_ratio = qf_updates_ratio
@@ -142,7 +148,30 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.sampler.shutdown_worker()
 
     def obtain_samples(self, itr):
-        return self.sampler.obtain_samples(itr)
+        pid = start_env_server()
+        conn_str = '127.0.0.1:8018'
+        conn = http.client.HTTPConnection(conn_str)
+        headers = {
+            "cache-control": "no-cache"
+        }
+        query = {
+            'env_name': self.env.wrapped_env.env_name,
+            'chk_dir': logger.get_snapshot_dir(),
+            'batch_size': self.batch_size,
+            'cores': self.n_parallel,
+            'difficulty': self.env.wrapped_env.difficulty
+        }
+        encoded_query = urllib.parse.urlencode(query)
+        response = None
+        while response != 'OK':
+            conn.request("GET", "/get_paths?" + encoded_query,
+                    headers=headers)
+            res = conn.getresponse()
+            response = json.loads(res.read())['Success']
+            paths = pickle.load(open(os.path.join(logger.get_snapshot_dir(), 'episodes_latest'), 'rb'))
+        destroy_env_server(pid)
+        return paths
+        # return self.sampler.obtain_samples(itr)
 
     def process_samples(self, itr, paths):
         return self.sampler.process_samples(itr, paths)
@@ -222,6 +251,21 @@ class BatchPolopt(RLAlgorithm, Poleval):
         sess.run(tf.global_variables_initializer())
         if self.restore_auto: self.restore()
         itr = sess.run(global_step)
+        print(self.n_parallel)
+        print("#############################")
+        if itr == 0:
+            logger.log("Initializing Scaler")
+            self.scaler = Scaler(self.env.observation_space.shape[0])
+            pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
+            params = self.get_itr_snapshot(itr, None)
+            logger.save_itr_params(itr, params)
+            paths = self.obtain_samples(itr)
+            unscaled_obs = np.concatenate([p['unscaled_obs'] for p in paths])
+            self.scaler.update(unscaled_obs)
+            pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
+        if self.restore_auto and itr > 0:
+            logger.log("Restoring scaler from chk_dir")
+            self.scaler = pickle.load(open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'rb'))
         start_time = time.time()
         t0 = time.time()
         while itr < self.n_itr:
@@ -230,6 +274,10 @@ class BatchPolopt(RLAlgorithm, Poleval):
                 logger.log("Mem: %f"%memory_usage_resource())
                 logger.log("Obtaining samples...")
                 paths = self.obtain_samples(itr)
+                logger.log("Updating scaler")
+                unscaled_obs = np.concatenate([p['unscaled_obs'] for p in paths])
+                self.scaler.update(unscaled_obs)
+                pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
                 logger.log("Processing samples...")
                 samples_data = self.process_samples(itr, paths)
                 logger.log("Logging diagnostics...")

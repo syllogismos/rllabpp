@@ -64,3 +64,4 @@ dependencies:
         - hyperopt
         - polling
         - git+https://github.com/stanfordnmbl/osim-rl.git@ver1.5
+        - psutil

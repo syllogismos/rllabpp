@@ -24,28 +24,29 @@ PORT_NUMBER = 8018
 
 def dump_episodes(env_name, difficulty,
         chk_dir, batch_size, cores):
-    # scaler_file = chk_dir + '/scaler_latest'
-    # scaler = pickle.load(open(scaler_file, 'rb'))
+    scaler_file = os.path.join(chk_dir, 'scaler_latest')
+    scaler = pickle.load(open(scaler_file, 'rb'))
     p = multiprocessing.Pool(cores, maxtasksperchild=1)
     paths = p.map(get_paths_from_latest_policy,
             [(env_name, difficulty, 
-              chk_dir, batch_size//cores)]*cores)
+              chk_dir, scaler, batch_size//cores)]*cores)
     p.close()
     p.join()
     paths = sum(paths, [])
-    episodes_file = chk_dir + '/episodes_latest'
+    episodes_file = os.path.join(chk_dir, 'episodes_latest')
     pickle.dump(paths, open(episodes_file, 'wb'))
 
 def get_paths_from_latest_policy(pickled_obj):
     """
-    pickled_obj = (env_name, chk_dir, batch_size_per_core)
+    pickled_obj = (env_name, difficulty, chk_dir, scaler, batch_size_per_core)
     """
     env_name = pickled_obj[0]
     difficulty = pickled_obj[1]
     chk_dir = pickled_obj[2]
-    batch_size_per_core = pickled_obj[3]
+    scaler = pickled_obj[3]
+    batch_size_per_core = pickled_obj[4]
     with tf.Session() as sess:
-        data = joblib.load(chk_dir + 'params.pkl')
+        data = joblib.load(os.path.join(chk_dir, 'params.pkl'))
         policy = data['policy']
         env = TfEnv(GymEnv(env_name, difficulty=difficulty,
             runenv_seed=1, visualize=False,
@@ -54,7 +55,7 @@ def get_paths_from_latest_policy(pickled_obj):
         paths = []
         while total_length < batch_size_per_core:
             path = rollout(env, policy, max_path_length=1000,
-                animated=False, always_return_paths=True)
+                animated=False, always_return_paths=True, scaler=scaler)
             paths.append(path)
             total_length += len(path['rewards'])
     return paths
