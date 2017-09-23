@@ -56,7 +56,7 @@ class Scaler(object):
 def start_env_server(p=0, ec2=True):
     port = str(8018 + p)
     http_server_path = '/home/ubuntu/rllabpp/runenv/server.py'
-    command = http_server_path + '--port ' + port
+    command = http_server_path + ' --port ' + port
     process = subprocess.Popen(command, shell=True)
     return process.pid
 
