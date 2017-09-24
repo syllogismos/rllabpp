@@ -1,9 +1,10 @@
 import numpy as np
 from rllab.misc import tensor_utils
-import time
+import time, redis
 
 def rollout(env, agent, max_path_length=np.inf, animated=False, speedup=1,
-            always_return_paths=False, scaler=None):
+            always_return_paths=False, scaler=None, redis_conn=None,
+            redis_key='None', batch_size=1000000):
     unscaled_obs = []
     observations = []
     actions = []
@@ -41,6 +42,18 @@ def rollout(env, agent, max_path_length=np.inf, animated=False, speedup=1,
             env.render()
             timestep = 0.05
             time.sleep(timestep / speedup)
+        if redis_conn is not None:
+            try:
+                curr_batch_size = redis_conn.get(redis_key)
+                if curr_batch_size is None:
+                    curr_batch_size = 0
+                curr_batch_size = int(curr_batch_size)
+                if curr_batch_size > batch_size:
+                    break
+            except:
+                print("redis get failed while rollout")
+                pass
+            
     if animated and not always_return_paths:
         return
 

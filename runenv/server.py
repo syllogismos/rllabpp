@@ -9,7 +9,7 @@ import numpy as np
 from runenv.helpers import Scaler
 import multiprocessing
 import pickle, os, joblib
-import random
+import random, redis
 import tensorflow as tf
 
 from rllab.sampler.utils import rollout
@@ -26,25 +26,33 @@ def dump_episodes(env_name, difficulty,
         chk_dir, batch_size, cores):
     scaler_file = os.path.join(chk_dir, 'scaler_latest')
     scaler = pickle.load(open(scaler_file, 'rb'))
+    redis_conn = redis.Redis()
+    redis_key = 'curr_batch_size-' + chk_dir
+    redis_conn.set(redis_key, 0)
     p = multiprocessing.Pool(cores, maxtasksperchild=1)
     paths = p.map(get_paths_from_latest_policy,
             [(env_name, difficulty, 
-              chk_dir, scaler, batch_size//cores)]*cores)
+              chk_dir, scaler, batch_size//cores, batch_size)]*cores)
     p.close()
     p.join()
     paths = sum(paths, [])
+    redis_conn.set(redis_key, 0)
     episodes_file = os.path.join(chk_dir, 'episodes_latest')
     pickle.dump(paths, open(episodes_file, 'wb'))
 
 def get_paths_from_latest_policy(pickled_obj):
     """
-    pickled_obj = (env_name, difficulty, chk_dir, scaler, batch_size_per_core)
+    pickled_obj = (env_name, difficulty, chk_dir, scaler,
+        batch_size_per_core, batch_size)
     """
     env_name = pickled_obj[0]
     difficulty = pickled_obj[1]
     chk_dir = pickled_obj[2]
     scaler = pickled_obj[3]
     batch_size_per_core = pickled_obj[4]
+    batch_size = pickled_obj[5]
+    redis_conn = redis.Redis()
+    redis_key = 'curr_batch_size-' + chk_dir
     with tf.Session() as sess:
         data = joblib.load(os.path.join(chk_dir, 'params.pkl'))
         policy = data['policy']
@@ -53,11 +61,17 @@ def get_paths_from_latest_policy(pickled_obj):
             record_log=False, record_video=False))
         total_length = 0
         paths = []
-        while total_length < batch_size_per_core:
+        # while total_length < batch_size_per_core:
+        while True:
             path = rollout(env, policy, max_path_length=1000,
-                animated=False, always_return_paths=True, scaler=scaler)
+                animated=False, always_return_paths=True, scaler=scaler,
+                redis_conn=redis_conn, redis_key=redis_key, batch_size=batch_size)
             paths.append(path)
+            redis_conn.incrby(redis_key, len(path['rewards']))
+            b_size = int(redis_conn.get(redis_key))
             total_length += len(path['rewards'])
+            if b_size >= batch_size:
+                break
     return paths
 
 class myHandler(BaseHTTPRequestHandler):
