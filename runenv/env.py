@@ -17,11 +17,11 @@ class RunEnvVanilla(Env):
     
     @property
     def observation_space(self):
-        return Box(low=-np.inf, high=np.inf, shape=(self.env.observation_space.shape[0]))
+        return Box(low=-np.inf, high=np.inf, shape=self.env.observation_space.shape)
 
     @property
     def action_space(self):
-        return Box(low=0, high=1, shape(self.env.action_space.shape[0]))
+        return Box(low=0, high=1, shape=self.env.action_space.shape)
 
     @property
     def horizon(self):
