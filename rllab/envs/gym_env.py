@@ -7,6 +7,7 @@ import logging
 import random
 
 from osim.env import RunEnv
+from runenv.env import RunEnvVanilla
 
 try:
     from gym.wrappers.monitoring import logger as monitor_logger
@@ -71,6 +72,9 @@ class GymEnv(Env, Serializable):
 
         if env_name == 'RunEnv':
             env = RunEnv(visualize=visualize)
+        elif env_name == 'RunEnvVanilla':
+            env = RunEnvVanilla(visualize=visualize, difficulty=difficulty,
+                                max_obstacles=max_obstacles)
         else:
             env = gym.envs.make(env_name)
         self.env = env
@@ -92,7 +96,7 @@ class GymEnv(Env, Serializable):
             else:
                 if video_schedule is None:
                     video_schedule = CappedCubicVideoSchedule()
-            if env_name != 'RunEnv':
+            if not env_name.startswith('RunEnv'):
                 self.env = gym.wrappers.Monitor(self.env, log_dir, video_callable=video_schedule, force=True)
             self.monitoring = True
 
@@ -101,6 +105,8 @@ class GymEnv(Env, Serializable):
         self._action_space = convert_gym_space(env.action_space)
         logger.log("action space: {}".format(self._action_space))
         if env_name == 'RunEnv':
+            self._horizon = env.horizon
+        elif env_name == "RunEnvVanilla":
             self._horizon = env.horizon
         else:
              self._horizon = env.spec.tags['wrapper_config.TimeLimit.max_episode_steps']
@@ -120,7 +126,7 @@ class GymEnv(Env, Serializable):
         return self._horizon
 
     def reset(self, seed=None):
-        if self._force_reset and self.monitoring and self.env_name != 'RunEnv':
+        if self._force_reset and self.monitoring and not self.env_name.startswith('RunEnv'):
             from gym.wrappers.monitoring import Monitor
             assert isinstance(self.env, Monitor)
             recorder = self.env.stats_recorder
@@ -130,6 +136,8 @@ class GymEnv(Env, Serializable):
             runenv_seed = random.randint(0, 100000000)
             logger.log("********** runenv reset seed: {}".format(runenv_seed))
             return self.env.reset(difficulty=self.difficulty, seed=runenv_seed)
+        elif self.env_name == 'RunEnvVanilla':
+            return self.env.reset()
         else:
             return self.env.reset()
 
