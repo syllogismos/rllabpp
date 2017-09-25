@@ -1,7 +1,7 @@
 from osim.env import RunEnv
 from rllab.envs.base import Env
 from rllab.envs.base import Step
-from rllab.spaces import Box
+from gym.spaces import Box
 import numpy as np
 import random
 from rllab.misc import logger
