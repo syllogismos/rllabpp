@@ -78,7 +78,10 @@ class GymEnv(Env, Serializable):
         else:
             env = gym.envs.make(env_name)
         self.env = env
-        self.env_id = env.spec.id
+        if env_name.startswith('RunEnv'):
+            self.env_id = env_name
+        else:
+            self.env_id = env.spec.id
 
         self.visualize = visualize
         self.runenv_seed = runenv_seed
