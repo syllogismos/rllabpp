@@ -151,6 +151,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
         pid = start_env_server()
         conn_str = '127.0.0.1:8018'
         conn = http.client.HTTPConnection(conn_str)
+        conn.set_debuglevel(0)
         headers = {
             "cache-control": "no-cache"
         }
