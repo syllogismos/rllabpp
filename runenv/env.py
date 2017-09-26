@@ -87,4 +87,4 @@ def get_features_from_history(history, filter_type=''):
     if filter_type == '':
         return np.hstack((curr_obs, past_obs))
     else:
-        NotImplementedError
+        raise NotImplementedError
