@@ -32,6 +32,8 @@ flags.DEFINE_integer('difficulty', 2, 'Difficulty of RunEnv Instance')
 flags.DEFINE_boolean('visualize', False, 'Visualization of RunEnv')
 flags.DEFINE_integer('runenv_seed', None, 'RunEnv Seed')
 flags.DEFINE_integer('max_obstacles', 3, 'Number of obstacles')
+flags.DEFINE_integer('history_len', 4, 'queue size of obs while computing features')
+flags.DEFINE_string('filter_type', '', 'Type of the filter defined in runenv/env')
 
 # learning params
 flags.DEFINE_float('learning_rate', 0.001, 'Base learning rate.')
@@ -253,6 +255,7 @@ def get_env(record_video=True, record_log=True, env_name=None, normalize_obs=Fal
     if env_name == 'RunEnv':
         env = TfEnv(normalize(GymEnv(env_name, difficulty=kwargs['difficulty'],
         runenv_seed=kwargs['runenv_seed'], visualize=kwargs['visualize'],
+        history_len=kwargs['history_len'], filter_type=kwargs['filter_type'],
         record_log=False, record_video=False), normalize_obs=normalize_obs))
     else:
         env = TfEnv(normalize(GymEnv(env_name, record_video=record_video,

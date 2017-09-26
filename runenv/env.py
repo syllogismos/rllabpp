@@ -45,7 +45,8 @@ class RunEnvVanilla(Env):
 
 
 class RunEnvFeatures(Env):
-    def __init__(self, difficulty=2, visualize=False, max_obstacles=3, history_len=4, filter_type=''):
+    def __init__(self, difficulty=2, visualize=False, max_obstacles=3,
+                 history_len=4, filter_type=''):
         self.env = RunEnv(visualize=visualize)
         self.difficulty = difficulty
         self.visualize = visualize

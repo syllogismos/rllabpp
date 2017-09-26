@@ -7,7 +7,7 @@ import logging
 import random
 
 from osim.env import RunEnv
-from runenv.env import RunEnvVanilla
+from runenv.env import RunEnvVanilla, RunEnvFeatures
 
 try:
     from gym.wrappers.monitoring import logger as monitor_logger
@@ -62,7 +62,8 @@ class NoVideoSchedule(object):
 class GymEnv(Env, Serializable):
     def __init__(self, env_name, record_video=True, video_schedule=None,
             log_dir=None, record_log=True, force_reset=False, visualize=False,
-            runenv_seed=None, difficulty=2, max_obstacles=3):
+            runenv_seed=None, difficulty=2, max_obstacles=3, history_len=4,
+            filter_type=''):
         if log_dir is None:
             if logger.get_snapshot_dir() is None:
                 logger.log("Warning: skipping Gym environment monitoring since snapshot_dir not configured.")
@@ -75,6 +76,10 @@ class GymEnv(Env, Serializable):
         elif env_name == 'RunEnvVanilla':
             env = RunEnvVanilla(visualize=visualize, difficulty=difficulty,
                                 max_obstacles=max_obstacles)
+        elif env_name == 'RunEnvFeatures':
+            env = RunEnvFeatures(visualize=visualize, difficulty=difficulty,
+                                 max_obstacles=max_obstacles, history_len=history_len,
+                                 filter_type=filter_type)
         else:
             env = gym.envs.make(env_name)
         self.env = env
@@ -88,6 +93,8 @@ class GymEnv(Env, Serializable):
         self.difficulty = difficulty
         self.max_obstacles = max_obstacles
         self.env_name = env_name
+        self.history_len = history_len
+        self.filter_type = filter_type
 
         assert not (not record_log and record_video)
 
@@ -107,9 +114,7 @@ class GymEnv(Env, Serializable):
         logger.log("observation space: {}".format(self._observation_space))
         self._action_space = convert_gym_space(env.action_space)
         logger.log("action space: {}".format(self._action_space))
-        if env_name == 'RunEnv':
-            self._horizon = env.horizon
-        elif env_name == "RunEnvVanilla":
+        if env_name.startswith('RunEnv'):
             self._horizon = env.horizon
         else:
              self._horizon = env.spec.tags['wrapper_config.TimeLimit.max_episode_steps']
@@ -139,9 +144,8 @@ class GymEnv(Env, Serializable):
             runenv_seed = random.randint(0, 100000000)
             logger.log("********** runenv reset seed: {}".format(runenv_seed))
             return self.env.reset(difficulty=self.difficulty, seed=runenv_seed)
-        elif self.env_name == 'RunEnvVanilla':
-            return self.env.reset()
         else:
+            # This includes the envs defined in runenv/env.py
             return self.env.reset()
 
     def step(self, action):
