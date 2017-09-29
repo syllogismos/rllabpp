@@ -101,7 +101,10 @@ class myHandler(BaseHTTPRequestHandler):
             cores = int(query['cores'][0])
             difficulty = int(query['difficulty'][0])
             max_obstacles = int(query['max_obstacles'][0])
-            filter_type = str(query['filter_type'][0])
+            if 'filter_type' in query:
+                filter_type = str(query['filter_type'][0])
+            else:
+                filter_type = ''
             history_len = int(query['history_len'][0])
             dump_episodes(env_name, difficulty, chk_dir, batch_size, cores,
                           max_obstacles, filter_type, history_len)
