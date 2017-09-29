@@ -83,9 +83,51 @@ class RunEnvFeatures(Env):
 
 
 def get_features_from_history(history, filter_type=''):
+    """
+    filter_type = '' => present and past observations as it is
+    filter_type = 'relative' => rate of change of x, and 
+                        relative position of all parts wrt pelvis
+    """
     curr_obs = np.copy(history[-1])
     past_obs = np.copy(history[0])
     if filter_type == '':
         return np.hstack((curr_obs, past_obs))
+    elif filter_type == 'relative':
+        new_obs = list(curr_obs)
+        pelvis = curr_obs[1]
+        head = curr_obs[22]
+        com = curr_obs[18]
+        new_obs.append(pelvis - head)
+        new_obs.append(pelvis - com)
+        new_obs.append(head - com)
+        new_obs.append(pelvis - curr_obs[22])
+        new_obs.append(pelvis - curr_obs[24])
+        new_obs.append(pelvis - curr_obs[26])
+        new_obs.append(pelvis - curr_obs[28])
+        new_obs.append(pelvis - curr_obs[30])
+        new_obs.append(pelvis - curr_obs[32])
+        new_obs.append(pelvis - curr_obs[34])
+        new_obs.append(head - curr_obs[22])
+        new_obs.append(head - curr_obs[24])
+        new_obs.append(head - curr_obs[26])
+        new_obs.append(head - curr_obs[28])
+        new_obs.append(head - curr_obs[30])
+        new_obs.append(head - curr_obs[32])
+        new_obs.append(head - curr_obs[34])
+        new_obs.append(curr_obs[22] - past_obs[22])
+        new_obs.append(curr_obs[23] - past_obs[23])
+        new_obs.append(curr_obs[24] - past_obs[24])
+        new_obs.append(curr_obs[25] - past_obs[25])
+        new_obs.append(curr_obs[26] - past_obs[26])
+        new_obs.append(curr_obs[27] - past_obs[27])
+        new_obs.append(curr_obs[28] - past_obs[28])
+        new_obs.append(curr_obs[29] - past_obs[29])
+        new_obs.append(curr_obs[30] - past_obs[30])
+        new_obs.append(curr_obs[31] - past_obs[31])
+        new_obs.append(curr_obs[32] - past_obs[32])
+        new_obs.append(curr_obs[33] - past_obs[33])
+        new_obs.append(curr_obs[34] - past_obs[34])
+        new_obs.append(curr_obs[35] - past_obs[35])
+        return np.array(new_obs)
     else:
         raise NotImplementedError
