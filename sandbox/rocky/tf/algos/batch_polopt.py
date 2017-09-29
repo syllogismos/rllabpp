@@ -100,6 +100,16 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.store_paths = store_paths
         self.whole_paths = whole_paths
         self.fixed_horizon = fixed_horizon
+        if env.wrapped_env.env_name.startswith('RunEnv'):
+            self.difficulty = self.env.wrapped_env.difficulty
+            self.history_len = self.env.wrapped_env.history_len
+            self.filter_type = self.env.wrapped_env.filter_type
+            self.max_obstacles = self.env.wrapped_env.max_obstacles
+        else:
+            self.difficulty = 2
+            self.history_len = 4
+            self.filter_type = ''
+            self.max_obstacles = 3
         self.qf = qf
         self.n_parallel = kwargs['n_parallel']
         print(self.n_parallel)
@@ -160,7 +170,10 @@ class BatchPolopt(RLAlgorithm, Poleval):
             'chk_dir': logger.get_snapshot_dir(),
             'batch_size': self.batch_size,
             'cores': self.n_parallel,
-            'difficulty': self.env.wrapped_env.difficulty
+            'difficulty': self.difficulty,
+            'filter_type': self.filter_type,
+            'max_obstacles': self.max_obstacles,
+            'history_len': self.history_len
         }
         encoded_query = urllib.parse.urlencode(query)
         response = None

@@ -23,7 +23,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 PORT_NUMBER = 8018
 
 def dump_episodes(env_name, difficulty,
-        chk_dir, batch_size, cores):
+        chk_dir, batch_size, cores,
+        max_obstacles, filter_type, history_len):
     scaler_file = os.path.join(chk_dir, 'scaler_latest')
     scaler = pickle.load(open(scaler_file, 'rb'))
     redis_conn = redis.Redis()
@@ -31,7 +32,7 @@ def dump_episodes(env_name, difficulty,
     redis_conn.set(redis_key, 0)
     p = multiprocessing.Pool(cores, maxtasksperchild=1)
     paths = p.map(get_paths_from_latest_policy,
-            [(env_name, difficulty, 
+            [(env_name, difficulty, max_obstacles, filter_type, history_len,
               chk_dir, scaler, batch_size//cores, batch_size)]*cores)
     p.close()
     p.join()
@@ -42,15 +43,18 @@ def dump_episodes(env_name, difficulty,
 
 def get_paths_from_latest_policy(pickled_obj):
     """
-    pickled_obj = (env_name, difficulty, chk_dir, scaler,
-        batch_size_per_core, batch_size)
+    pickled_obj = (env_name, difficulty, max_obstacles, filter_type, history_len,
+              chk_dir, scaler, batch_size_per_cores, batch_size)
     """
     env_name = pickled_obj[0]
     difficulty = pickled_obj[1]
-    chk_dir = pickled_obj[2]
-    scaler = pickled_obj[3]
-    batch_size_per_core = pickled_obj[4]
-    batch_size = pickled_obj[5]
+    max_obstacles = pickled_obj[2]
+    filter_type = pickled_obj[3]
+    history_len = pickled_obj[4]
+    chk_dir = pickled_obj[5]
+    scaler = pickled_obj[6]
+    batch_size_per_core = pickled_obj[7]
+    batch_size = pickled_obj[8]
     redis_conn = redis.Redis()
     redis_key = 'curr_batch_size-' + chk_dir
     with tf.Session() as sess:
@@ -58,7 +62,8 @@ def get_paths_from_latest_policy(pickled_obj):
         policy = data['policy']
         env = TfEnv(GymEnv(env_name, difficulty=difficulty,
             runenv_seed=1, visualize=False,
-            record_log=False, record_video=False))
+            record_log=False, record_video=False, filter_type=filter_type,
+            history_len=history_len, max_obstacles=max_obstacles))
         total_length = 0
         paths = []
         # while total_length < batch_size_per_core:
@@ -95,7 +100,11 @@ class myHandler(BaseHTTPRequestHandler):
             batch_size = int(query['batch_size'][0])
             cores = int(query['cores'][0])
             difficulty = int(query['difficulty'][0])
-            dump_episodes(env_name, difficulty, chk_dir, batch_size, cores)
+            max_obstacles = int(query['max_obstacles'][0])
+            filter_type = str(query['filter_type'][0])
+            history_len = int(query['history_len'][0])
+            dump_episodes(env_name, difficulty, chk_dir, batch_size, cores,
+                          max_obstacles, filter_type, history_len)
             self.send_response(200)
             self.send_header('Content-type', 'application/javascript')
             self.end_headers()
