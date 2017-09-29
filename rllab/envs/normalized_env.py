@@ -33,7 +33,7 @@ class NormalizedEnv(ProxyEnv, Serializable):
         self.difficulty = self.wrapped_env.difficulty
         self.max_obstacles = self.wrapped_env.max_obstacles
         self.history_len = self.wrapped_env.history_len
-        self.filter_type = self.filter_type
+        self.filter_type = self.wrapped_env.filter_type
 
     def _update_obs_estimate(self, obs):
         flat_obs = self.wrapped_env.observation_space.flatten(obs)
