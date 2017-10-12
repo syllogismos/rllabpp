@@ -53,8 +53,8 @@ class Scaler(object):
         return 1 / (np.sqrt(self.vars) + 0.1) / 3, self.means
 
 
-def start_env_server(p=0, ec2=True):
-    port = str(8018 + p)
+def start_env_server(port, p=0, ec2=True):
+    port = str(int(port) + p)
     http_server_path = '/home/ubuntu/rllabpp/runenv/server.py'
     command = http_server_path + ' --port ' + port
     process = subprocess.Popen(command, shell=True)

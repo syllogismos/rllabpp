@@ -100,6 +100,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.store_paths = store_paths
         self.whole_paths = whole_paths
         self.fixed_horizon = fixed_horizon
+        self.server_port = server_port
         if env.wrapped_env.env_name.startswith('RunEnv'):
             self.difficulty = self.env.wrapped_env.difficulty
             self.history_len = self.env.wrapped_env.history_len
@@ -158,8 +159,8 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.sampler.shutdown_worker()
 
     def obtain_samples(self, itr):
-        pid = start_env_server()
-        conn_str = '127.0.0.1:8018'
+        pid = start_env_server(self.server_port)
+        conn_str = '127.0.0.1:' + self.server_port
         conn = http.client.HTTPConnection(conn_str)
         conn.set_debuglevel(0)
         headers = {

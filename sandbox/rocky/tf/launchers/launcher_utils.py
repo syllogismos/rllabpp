@@ -34,6 +34,7 @@ flags.DEFINE_integer('runenv_seed', None, 'RunEnv Seed')
 flags.DEFINE_integer('max_obstacles', 3, 'Number of obstacles')
 flags.DEFINE_integer('history_len', 4, 'queue size of obs while computing features')
 flags.DEFINE_string('filter_type', '', 'Type of the filter defined in runenv/env')
+flags.DEFINE_string('server_port', '8018', 'port to start runenv servers')
 
 # learning params
 flags.DEFINE_float('learning_rate', 0.001, 'Base learning rate.')
