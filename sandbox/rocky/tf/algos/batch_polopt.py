@@ -100,7 +100,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.store_paths = store_paths
         self.whole_paths = whole_paths
         self.fixed_horizon = fixed_horizon
-        self.server_port = server_port
+        self.server_port = kwargs['server_port']
         if env.wrapped_env.env_name.startswith('RunEnv'):
             self.difficulty = self.env.wrapped_env.difficulty
             self.history_len = self.env.wrapped_env.history_len
