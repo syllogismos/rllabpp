@@ -285,6 +285,9 @@ class BatchPolopt(RLAlgorithm, Poleval):
             self.scaler = pickle.load(open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'rb'))
         if not self.scaler_flag:
             self.scaler = None
+            if itr == 0:
+                params = self.get_itr_snapshot(itr, None)
+                logger.save_itr_params(itr, params)
         start_time = time.time()
         t0 = time.time()
         while itr < self.n_itr:
