@@ -26,7 +26,10 @@ def dump_episodes(env_name, difficulty,
         chk_dir, batch_size, cores,
         max_obstacles, filter_type, history_len):
     scaler_file = os.path.join(chk_dir, 'scaler_latest')
-    scaler = pickle.load(open(scaler_file, 'rb'))
+    if os.path.exists(scaler_file): 
+        scaler = pickle.load(open(scaler_file, 'rb'))
+    else:
+        scaler = None
     redis_conn = redis.Redis()
     redis_key = 'curr_batch_size-' + chk_dir
     redis_conn.set(redis_key, 0)

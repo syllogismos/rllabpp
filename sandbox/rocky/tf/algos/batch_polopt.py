@@ -101,6 +101,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.whole_paths = whole_paths
         self.fixed_horizon = fixed_horizon
         self.server_port = kwargs['server_port']
+        self.scaler_flag = kwargs['scaler']
         if env.wrapped_env.env_name.startswith('RunEnv'):
             self.difficulty = self.env.wrapped_env.difficulty
             self.history_len = self.env.wrapped_env.history_len
@@ -175,6 +176,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
             'filter_type': self.filter_type,
             'max_obstacles': self.max_obstacles,
             'history_len': self.history_len
+            # 'scaler_flag': self.scaler_flag
         }
         encoded_query = urllib.parse.urlencode(query)
         response = None
@@ -268,7 +270,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
         itr = sess.run(global_step)
         print(self.n_parallel)
         print("#############################")
-        if itr == 0:
+        if itr == 0 and self.scaler_flag:
             logger.log("Initializing Scaler")
             self.scaler = Scaler(self.env.observation_space.shape[0])
             pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
@@ -278,9 +280,11 @@ class BatchPolopt(RLAlgorithm, Poleval):
             unscaled_obs = np.concatenate([p['unscaled_obs'] for p in paths])
             self.scaler.update(unscaled_obs)
             pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
-        if self.restore_auto and itr > 0:
+        if self.restore_auto and itr > 0 and self.scaler_flag:
             logger.log("Restoring scaler from chk_dir")
             self.scaler = pickle.load(open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'rb'))
+        if not self.scaler_flag:
+            self.scaler = None
         start_time = time.time()
         t0 = time.time()
         while itr < self.n_itr:
@@ -291,8 +295,9 @@ class BatchPolopt(RLAlgorithm, Poleval):
                 paths = self.obtain_samples(itr)
                 logger.log("Updating scaler")
                 unscaled_obs = np.concatenate([p['unscaled_obs'] for p in paths])
-                self.scaler.update(unscaled_obs)
-                pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
+                if self.scaler_flag:
+                    self.scaler.update(unscaled_obs)
+                    pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
                 logger.log("Processing samples...")
                 samples_data = self.process_samples(itr, paths)
                 logger.log("Logging diagnostics...")

@@ -317,6 +317,8 @@ def get_algo(env, policy, es, qf, baseline, max_path_length,
         extra_kwargs['n_parallel'] = kwargs['n_parallel']
     if 'server_port' in kwargs:
         extra_kwargs['server_port'] = kwargs['server_port']
+    if 'scaler' in kwargs:
+        extra_kwargs['scaler'] = kwargs['scaler']
 
     print('Creating algo=%s with n_itr=%d, max_path_length=%d...'%(
         algo_name, n_itr, max_path_length))
