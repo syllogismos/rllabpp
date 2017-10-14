@@ -207,8 +207,8 @@ class BatchPolopt(RLAlgorithm, Poleval):
 
         checkpoint_file = os.path.join(checkpoint_dir, 'params.chk')
         sess = tf.get_default_session()
-        saver = tf.train.Saver(max_to_keep=200)
-        saver.save(sess, checkpoint_file, global_step=itr)
+        # saver = tf.train.Saver(max_to_keep=200)
+        self.saver.save(sess, checkpoint_file, global_step=itr)
 
         tabular_file = os.path.join(checkpoint_dir, 'progress.csv')
         if os.path.isfile(tabular_file):
@@ -224,8 +224,8 @@ class BatchPolopt(RLAlgorithm, Poleval):
         logger.log('loading checkpoint from %s'%checkpoint_file)
         if checkpoint_file is not None and os.path.isfile(str(checkpoint_file) + '.meta'):
             sess = tf.get_default_session()
-            saver = tf.train.Saver(max_to_keep=200)
-            saver.restore(sess, checkpoint_file)
+            # saver = tf.train.Saver(max_to_keep=200)
+            self.saver.restore(sess, checkpoint_file)
 
             tabular_chk_file = os.path.join(checkpoint_dir, 'progress.csv.chk')
             if os.path.isfile(tabular_chk_file):
@@ -248,6 +248,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
 
     def train(self, sess=None):
         global_step = tf.Variable(0, name='global_step', trainable=False, dtype=tf.int32)
+        self.saver = tf.train.Saver(max_to_keep=2)
         increment_global_step_op = tf.assign(global_step, global_step+1)
         created_session = True if (sess is None) else False
         if sess is None:

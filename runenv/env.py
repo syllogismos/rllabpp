@@ -54,6 +54,7 @@ class RunEnvFeatures(Env):
         self.obs_len = len(get_features_from_history([[0.0]*41], filter_type=filter_type))
         self.history = deque(maxlen=history_len)
         self.filter_type = filter_type
+        self.history_len = history_len
 
     @property
     def observation_space(self):
@@ -71,6 +72,7 @@ class RunEnvFeatures(Env):
         seed = random.randint(0, SEEDMAX)
         logger.log('reset seed is {}'.format(seed))
         self.runenv_state = self.env.reset(difficulty=self.difficulty, seed=seed)
+        self.history = deque(maxlen=self.history_len)
         self.history.append(np.copy(self.runenv_state))
         observation = get_features_from_history(self.history, filter_type=self.filter_type)
         return observation
@@ -97,37 +99,37 @@ def get_features_from_history(history, filter_type=''):
         pelvis = curr_obs[1]
         head = curr_obs[22]
         com = curr_obs[18]
-        new_obs.append(pelvis - head)
-        new_obs.append(pelvis - com)
-        new_obs.append(head - com)
-        new_obs.append(pelvis - curr_obs[22])
-        new_obs.append(pelvis - curr_obs[24])
-        new_obs.append(pelvis - curr_obs[26])
-        new_obs.append(pelvis - curr_obs[28])
-        new_obs.append(pelvis - curr_obs[30])
-        new_obs.append(pelvis - curr_obs[32])
-        new_obs.append(pelvis - curr_obs[34])
-        new_obs.append(head - curr_obs[22])
-        new_obs.append(head - curr_obs[24])
-        new_obs.append(head - curr_obs[26])
-        new_obs.append(head - curr_obs[28])
-        new_obs.append(head - curr_obs[30])
-        new_obs.append(head - curr_obs[32])
-        new_obs.append(head - curr_obs[34])
-        new_obs.append(curr_obs[22] - past_obs[22])
-        new_obs.append(curr_obs[23] - past_obs[23])
-        new_obs.append(curr_obs[24] - past_obs[24])
-        new_obs.append(curr_obs[25] - past_obs[25])
-        new_obs.append(curr_obs[26] - past_obs[26])
-        new_obs.append(curr_obs[27] - past_obs[27])
-        new_obs.append(curr_obs[28] - past_obs[28])
-        new_obs.append(curr_obs[29] - past_obs[29])
-        new_obs.append(curr_obs[30] - past_obs[30])
-        new_obs.append(curr_obs[31] - past_obs[31])
-        new_obs.append(curr_obs[32] - past_obs[32])
-        new_obs.append(curr_obs[33] - past_obs[33])
-        new_obs.append(curr_obs[34] - past_obs[34])
-        new_obs.append(curr_obs[35] - past_obs[35])
+        new_obs.append(pelvis - head) # 41
+        new_obs.append(pelvis - com) # 42
+        new_obs.append(head - com) # 43
+        new_obs.append(pelvis - curr_obs[22]) # 44
+        new_obs.append(pelvis - curr_obs[24]) # 45
+        new_obs.append(pelvis - curr_obs[26]) # 46
+        new_obs.append(pelvis - curr_obs[28]) # 47
+        new_obs.append(pelvis - curr_obs[30]) # 48
+        new_obs.append(pelvis - curr_obs[32]) # 49
+        new_obs.append(pelvis - curr_obs[34]) # 50
+        new_obs.append(head - curr_obs[22]) # 51
+        new_obs.append(head - curr_obs[24]) # 52 
+        new_obs.append(head - curr_obs[26]) # 53
+        new_obs.append(head - curr_obs[28]) # 54
+        new_obs.append(head - curr_obs[30]) # 55
+        new_obs.append(head - curr_obs[32]) # 56
+        new_obs.append(head - curr_obs[34]) # 57
+        new_obs.append(curr_obs[22] - past_obs[22]) # 58
+        new_obs.append(curr_obs[23] - past_obs[23]) # 59
+        new_obs.append(curr_obs[24] - past_obs[24]) # 60
+        new_obs.append(curr_obs[25] - past_obs[25]) # 61
+        new_obs.append(curr_obs[26] - past_obs[26]) # 62
+        new_obs.append(curr_obs[27] - past_obs[27]) # 63
+        new_obs.append(curr_obs[28] - past_obs[28]) # 64
+        new_obs.append(curr_obs[29] - past_obs[29]) # 65
+        new_obs.append(curr_obs[30] - past_obs[30]) # 66
+        new_obs.append(curr_obs[31] - past_obs[31]) # 67
+        new_obs.append(curr_obs[32] - past_obs[32]) # 68
+        new_obs.append(curr_obs[33] - past_obs[33]) # 69
+        new_obs.append(curr_obs[34] - past_obs[34]) # 70
+        new_obs.append(curr_obs[35] - past_obs[35]) # 71
         return np.array(new_obs)
     else:
         raise NotImplementedError
