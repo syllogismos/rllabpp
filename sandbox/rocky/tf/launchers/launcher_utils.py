@@ -19,7 +19,7 @@ flags.DEFINE_string('ec2_settings', 'experiments/python/example.py', 'Settings f
 flags.DEFINE_string('exp', 'default', 'Experiment name.')
 flags.DEFINE_boolean('overwrite', False, 'Overwrite logs by default.')
 flags.DEFINE_boolean('force_start', False, 'Force start all.')
-flags.DEFINE_integer('save_freq', 0, 'Save checkpoint frequency.')
+flags.DEFINE_integer('save_freq', 1, 'Save checkpoint frequency.')
 flags.DEFINE_boolean('restore_auto', True, 'Restore params if checkpoint is available.')
 flags.DEFINE_boolean('force_batch_sampler', True, 'Force Batch sampler instead vecotrizer sampler')
 flags.DEFINE_integer('n_parallel', 1, 'No of parallel threads for Batch sampling')
