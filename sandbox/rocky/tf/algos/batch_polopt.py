@@ -248,7 +248,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
 
     def train(self, sess=None):
         global_step = tf.Variable(0, name='global_step', trainable=False, dtype=tf.int32)
-        self.saver = tf.train.Saver(max_to_keep=200)
+        self.saver = tf.train.Saver(max_to_keep=100)
         increment_global_step_op = tf.assign(global_step, global_step+1)
         created_session = True if (sess is None) else False
         if sess is None:
