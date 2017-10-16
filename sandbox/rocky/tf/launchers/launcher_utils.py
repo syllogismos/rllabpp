@@ -257,7 +257,7 @@ def get_env(record_video=True, record_log=True, env_name=None, normalize_obs=Fal
     if env_name.startswith('RunEnv'):
         env = TfEnv(normalize(GymEnv(env_name, difficulty=kwargs['difficulty'],
         runenv_seed=kwargs['runenv_seed'], visualize=kwargs['visualize'],
-        history_len=kwargs['history_len'], filter_type=kwargs['filter_type'],
+        history_len=kwargs['history_len'], filter_type=kwargs['filter_type'], max_obstacles=kwargs['max_obstacles'],
         record_log=False, record_video=False), normalize_obs=normalize_obs))
     else:
         env = TfEnv(normalize(GymEnv(env_name, record_video=record_video,
