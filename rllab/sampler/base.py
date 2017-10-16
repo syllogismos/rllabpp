@@ -62,6 +62,7 @@ class BaseSampler(Sampler):
         else:
             all_path_baselines = [self.algo.baseline.predict(path) for path in paths]
 
+        path_lens = []
         for idx, path in enumerate(paths):
             path_baselines = np.append(all_path_baselines[idx], 0)
             deltas = path["rewards"] + \
@@ -73,6 +74,8 @@ class BaseSampler(Sampler):
             path["returns"] = special.discount_cumsum(path["rewards"], self.algo.discount)
             baselines.append(path_baselines[:-1])
             returns.append(path["returns"])
+            path_lens.append(path['observations'].shape[0])
+        path_lens = np.array(path_lens)
 
         ev = special.explained_variance_1d(
             np.concatenate(baselines),
@@ -218,5 +221,8 @@ class BaseSampler(Sampler):
         logger.record_tabular('StdReturn', np.std(undiscounted_returns))
         logger.record_tabular('MaxReturn', np.max(undiscounted_returns))
         logger.record_tabular('MinReturn', np.min(undiscounted_returns))
+        logger.record_tabular('MaxLength', path_lens.max())
+        logger.record_tabular('MeanLength', path_lens.mean())
+        logger.record_tabular('MinLength', path_lens.min())
 
         return samples_data
