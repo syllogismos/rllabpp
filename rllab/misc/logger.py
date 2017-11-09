@@ -259,8 +259,8 @@ def dump_tabular(*args, **kwargs):
             for line in tabulate(_tabular).split('\n'):
                 log(line, *args, **kwargs)
         tabular_dict = dict(_tabular)
-        struct_log.info('train_log', 
-                        train_log = tabular_dict
+        struct_log.info('rl_log', 
+                        rl_log = tabular_dict
         )
         # Also write to the csv files
         # This assumes that the keys in each iteration won't change!
