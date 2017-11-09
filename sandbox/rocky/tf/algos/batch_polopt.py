@@ -104,7 +104,8 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.scaler_flag = kwargs['scaler']
         self.userId = kwargs['userId']
         self.expId = kwargs['expId']
-        self.struct_log = logger.set_struct_logger('anil', 'exp1')
+        self.variantId = kwargs['variantId']
+        self.struct_log = logger.set_struct_logger(self.userId, self.expId, self.variantId)
         # self.struct_log = logger.get_struct_logger()
         if env.wrapped_env.env_name.startswith('RunEnv'):
             self.difficulty = self.env.wrapped_env.difficulty

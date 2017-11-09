@@ -323,6 +323,8 @@ def get_algo(env, policy, es, qf, baseline, max_path_length,
         extra_kwargs['userId'] = kwargs['userId']
     if 'expId' in kwargs:
         extra_kwargs['expId'] = kwargs['expId']
+    if 'variantId' in kwargs:
+        extra_kwargs['variantId'] = kwargs['variantId']
     print('Creating algo=%s with n_itr=%d, max_path_length=%d...'%(
         algo_name, n_itr, max_path_length))
     if algo_name in [

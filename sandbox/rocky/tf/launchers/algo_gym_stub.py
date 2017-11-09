@@ -11,15 +11,8 @@ import numpy as np
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 def set_experiment(mode="local", keys=None, params=dict()):
-    print(params)
-    print("Printing params once")
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
     flags = FLAGS.__flags
-    print(flags)
-    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     flags = deepcopy(flags)
-    print(flags)
-    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
     for k, v in params.items():
         print('Modifying flags.%s from %r to %r'%(

@@ -49,9 +49,9 @@ struct_logger = structlog.getLogger('train_logs')
 struct_log = None
 
 
-def set_struct_logger(userId, experimentId):
+def set_struct_logger(userId, experimentId, variantId):
     global struct_log
-    struct_log = struct_logger.new(user = userId, exp = experimentId)
+    struct_log = struct_logger.new(user=userId, exp=experimentId, variant=variantId)
     return struct_log
 
 def get_struct_logger():

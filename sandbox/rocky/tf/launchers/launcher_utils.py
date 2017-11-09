@@ -14,6 +14,11 @@ from sandbox.rocky.tf.envs.base import TfEnv
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 
+# eschernode
+flags.DEFINE_string('expId', 'expId', 'experiment id from mongo')
+flags.DEFINE_string('userId', 'userId', 'user id from mongo')
+flags.DEFINE_string('variantId', '0', 'variant id')
+
 # misc
 flags.DEFINE_string('ec2_settings', 'experiments/python/example.py', 'Settings file for launching EC2 experiments.')
 flags.DEFINE_string('exp', 'default', 'Experiment name.')
