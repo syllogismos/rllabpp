@@ -319,7 +319,10 @@ def get_algo(env, policy, es, qf, baseline, max_path_length,
         extra_kwargs['server_port'] = kwargs['server_port']
     if 'scaler' in kwargs:
         extra_kwargs['scaler'] = kwargs['scaler']
-
+    if 'userId' in kwargs:
+        extra_kwargs['userId'] = kwargs['userId']
+    if 'expId' in kwargs:
+        extra_kwargs['expId'] = kwargs['expId']
     print('Creating algo=%s with n_itr=%d, max_path_length=%d...'%(
         algo_name, n_itr, max_path_length))
     if algo_name in [

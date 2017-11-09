@@ -11,6 +11,9 @@ import numpy as np
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 def set_experiment(mode="local", keys=None, params=dict()):
+    print(params)
+    print("Printing params once")
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
     flags = FLAGS.__flags
     flags = deepcopy(flags)
 

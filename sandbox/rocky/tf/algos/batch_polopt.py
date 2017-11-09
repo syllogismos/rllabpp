@@ -102,6 +102,8 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.fixed_horizon = fixed_horizon
         self.server_port = kwargs['server_port']
         self.scaler_flag = kwargs['scaler']
+        self.userId = kwargs['userId']
+        self.expId = kwargs['expId']
         self.struct_log = logger.set_struct_logger('anil', 'exp1')
         # self.struct_log = logger.get_struct_logger()
         if env.wrapped_env.env_name.startswith('RunEnv'):
