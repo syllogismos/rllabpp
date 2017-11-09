@@ -16,6 +16,47 @@ import json
 import pickle
 import base64
 import shutil
+import logging, structlog
+from logging.handlers import WatchedFileHandler
+from structlog.threadlocal import wrap_dict
+
+# Structlog config
+structlog.configure(
+    processors=[
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        structlog.processors.JSONRenderer()
+    ],
+    context_class=wrap_dict(dict),
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
+logging_logger = logging.getLogger('train_logs')
+logging_logger.setLevel(logging.INFO)
+
+logging_handler = WatchedFileHandler('/home/ubuntu/rllabpp/structlogs.log')
+logging_logger.addHandler(logging_handler)
+
+struct_logger = structlog.getLogger('train_logs')
+
+struct_log = None
+
+
+def set_struct_logger(userId, experimentId):
+    global struct_log
+    struct_log = struct_logger.new(user = userId, exp = experimentId)
+    return struct_log
+
+def get_struct_logger():
+    return struct_log
+
 
 _prefixes = []
 _prefix_str = ''
@@ -218,6 +259,9 @@ def dump_tabular(*args, **kwargs):
             for line in tabulate(_tabular).split('\n'):
                 log(line, *args, **kwargs)
         tabular_dict = dict(_tabular)
+        struct_log.info('train_log', 
+                        train_log = tabular_dict
+        )
         # Also write to the csv files
         # This assumes that the keys in each iteration won't change!
         for tabular_fd in list(_tabular_fds.values()):
