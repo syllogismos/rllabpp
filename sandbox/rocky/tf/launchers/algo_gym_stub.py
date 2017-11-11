@@ -19,6 +19,8 @@ mongoClient = MongoClient(MONGO_HOST, MONGO_PORT, connect=False)
 
 db = mongoClient[MONGO_DB]
 
+MAIN_KEYS = ['user']
+
 NON_VARIANT_KEYS = {'string': ['env_name', 'exp', 'baseline_hidden_sizes', 'qf_hidden_nonlinearity',
                                'qf_hidden_sizes', 'policy_output_nonlinearity', 'policy_hidden_nonlinearity',
                                'policy_hidden_sizes', 'algo_name'], 
@@ -38,6 +40,8 @@ def get_exp_config(expId, variantIndex):
     exp = getExperimentById(expId)
     assert(exp != None)
     config = {}
+    for key in MAIN_KEYS:
+        config[key] = exp[key]
     for key in NON_VARIANT_KEYS['string']:
         config[key] = exp['config'][key]
     for key in NON_VARIANT_KEYS['int']:
