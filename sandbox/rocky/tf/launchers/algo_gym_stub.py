@@ -7,15 +7,59 @@ import sys, os
 import tensorflow as tf
 from copy import deepcopy
 import numpy as np
+from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+MONGO_HOST = '172.30.0.169'
+MONGO_PORT = 27017
+MONGO_DB = 'eschernode'
+mongoClient = MongoClient(MONGO_HOST, MONGO_PORT, connect=False)
+
+db = mongoClient[MONGO_DB]
+
+NON_VARIANT_KEYS = ['n_parallel', 'baseline_hidden_sizes', 'qf_hidden_nonlinearity',
+    'qf_hidden_sizes', 'policy_output_nonlinearity', 'policy_hidden_nonlinearity',
+    'policy_hidden_sizes', 'algo_name', 'max_episode', 'env_name', 'exp']
+
+VARIANT_KEYS = ['seed', 'qf_batch_size', 'policy_batch_size', 'qf_learning_rate',
+    'replay_pool_size', 'scale_reward', 'step_size', 'gae_lambda', 'learning_rate',
+    'discount', 'batch_size']
+
+def getExperimentById(expId):
+    return db.experiments.find_one({'_id': ObjectId(expId)})
+
+def get_exp_config(expId, variantIndex):
+    exp = getExperimentById(expId)
+    assert(exp != None)
+    config = {}
+    for key in NON_VARIANT_KEYS:
+        config[key] = exp[key]
+    for key in VARIANT_KEYS:
+        config[key] = exp['variants'][variantIndex][key]
+    return config
+
 
 def set_experiment(mode="local", keys=None, params=dict()):
     flags = FLAGS.__flags
     flags = deepcopy(flags)
 
+    if flags['expId'] == 'expId':
+        pass
+    else:
+        print("Getting exp config from mongo")
+        variantIndex = flags['variantId']
+        expId = flags['expId']
+        experiment_config_from_mongo = get_exp_config(expId, variantIndex)
+    
     for k, v in params.items():
         print('Modifying flags.%s from %r to %r'%(
+            k, flags[k], v))
+        flags[k] = v
+
+    for k, v in experiment_config_from_mongo.items():
+        print('Getting flags from mongo. %s from %r to %r'%(
             k, flags[k], v))
         flags[k] = v
 
