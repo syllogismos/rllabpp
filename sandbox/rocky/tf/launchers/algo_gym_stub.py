@@ -49,7 +49,7 @@ def set_experiment(mode="local", keys=None, params=dict()):
         pass
     else:
         print("Getting exp config from mongo")
-        variantIndex = flags['variantId']
+        variantIndex = int(flags['variantId'])
         expId = flags['expId']
         experiment_config_from_mongo = get_exp_config(expId, variantIndex)
     
