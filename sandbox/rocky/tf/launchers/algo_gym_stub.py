@@ -35,9 +35,9 @@ def get_exp_config(expId, variantIndex):
     assert(exp != None)
     config = {}
     for key in NON_VARIANT_KEYS:
-        config[key] = exp[key]
+        config[key] = exp['config'][key]
     for key in VARIANT_KEYS:
-        config[key] = exp['variants'][variantIndex][key]
+        config[key] = exp['config']['variants'][variantIndex][key]
     return config
 
 
