@@ -19,13 +19,17 @@ mongoClient = MongoClient(MONGO_HOST, MONGO_PORT, connect=False)
 
 db = mongoClient[MONGO_DB]
 
-NON_VARIANT_KEYS = ['n_parallel', 'baseline_hidden_sizes', 'qf_hidden_nonlinearity',
-    'qf_hidden_sizes', 'policy_output_nonlinearity', 'policy_hidden_nonlinearity',
-    'policy_hidden_sizes', 'algo_name', 'max_episode', 'env_name', 'exp']
+NON_VARIANT_KEYS = {'string': ['env_name', 'exp', 'baseline_hidden_sizes', 'qf_hidden_nonlinearity',
+                               'qf_hidden_sizes', 'policy_output_nonlinearity', 'policy_hidden_nonlinearity',
+                               'policy_hidden_sizes', 'algo_name'], 
+                    'int': ['max_episode', 'n_parallel'],
+                    'float': []
+                   } 
 
-VARIANT_KEYS = ['seed', 'qf_batch_size', 'policy_batch_size', 'qf_learning_rate',
-    'replay_pool_size', 'scale_reward', 'step_size', 'gae_lambda', 'learning_rate',
-    'discount', 'batch_size']
+VARIANT_KEYS = {'string': [],
+                'int': ['seed', 'qf_batch_size', 'policy_batch_size', 'replay_pool_size', 'batch_size'],
+                'float': ['qf_learning_rate', 'scale_reward', 'step_size', 'gae_lambda', 'learning_rate', 'discount']
+               }
 
 def getExperimentById(expId):
     return db.experiments.find_one({'_id': ObjectId(expId)})
@@ -34,10 +38,18 @@ def get_exp_config(expId, variantIndex):
     exp = getExperimentById(expId)
     assert(exp != None)
     config = {}
-    for key in NON_VARIANT_KEYS:
+    for key in NON_VARIANT_KEYS['string']:
         config[key] = exp['config'][key]
-    for key in VARIANT_KEYS:
+    for key in NON_VARIANT_KEYS['int']:
+        config[key] = int(exp['config'][key])
+    for key in NON_VARIANT_KEYS['float']:
+        config[key] = float(exp['config'][key])
+    for key in VARIANT_KEYS['string']:
         config[key] = exp['config']['variants'][variantIndex][key]
+    for key in VARIANT_KEYS['int']:
+        config[key] = int(exp['config']['variants'][variantIndex][key])
+    for key in VARIANT_KEYS['float']:
+        config[key] = float(exp['config']['variants'][variantIndex][key])
     return config
 
 
