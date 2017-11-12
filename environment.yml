@@ -30,7 +30,6 @@ dependencies:
     - lapack
     - git
     - pymongo
-    - structlog
     - pip:
         - Pillow
         - atari-py
@@ -67,3 +66,4 @@ dependencies:
         - polling
         - git+https://github.com/stanfordnmbl/osim-rl.git
         - psutil
+        - structlog
