@@ -62,7 +62,7 @@ def set_experiment(mode="local", keys=None, params=dict()):
     flags = deepcopy(flags)
 
     if flags['expId'] == 'expId':
-        pass
+        experiment_config_from_mongo = {}
     else:
         print("Getting exp config from mongo")
         variantIndex = int(flags['variantId'])
