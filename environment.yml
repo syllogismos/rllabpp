@@ -1,3 +1,5 @@
+# sudo apt-get install xvfb libav-tools xorg-dev libsdl2-dev swig cmake
+
 name: rllabpp
 channels:
     - https://conda.anaconda.org/kne 
