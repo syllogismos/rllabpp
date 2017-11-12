@@ -30,6 +30,7 @@ dependencies:
     - lapack
     - git
     - pymongo
+    - structlog
     - pip:
         - Pillow
         - atari-py
@@ -64,5 +65,5 @@ dependencies:
         - pylru==1.0.9
         - hyperopt
         - polling
-        - git+https://github.com/stanfordnmbl/osim-rl.git@ver1.5
+        - git+https://github.com/stanfordnmbl/osim-rl.git
         - psutil
