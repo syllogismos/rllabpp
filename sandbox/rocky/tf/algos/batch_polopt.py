@@ -341,7 +341,11 @@ class BatchPolopt(RLAlgorithm, Poleval):
         if created_session:
             sess.close()
 
-        terminate_running_ec2_instance()
+        if self.expId != 'expId':
+            """
+            terminate the ec2 instance if rllab used to lauch experiment from mongo
+            """
+            terminate_running_ec2_instance()
 
     def log_diagnostics(self, paths):
         self.env.log_diagnostics(paths)
