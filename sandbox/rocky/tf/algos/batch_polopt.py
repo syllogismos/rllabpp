@@ -18,6 +18,7 @@ from rllab.sampler.utils import rollout
 from runenv.helpers import Scaler
 import urllib, http.client, json
 from runenv.helpers import start_env_server, destroy_env_server
+from escher.helpers import terminate_running_ec2_instance
 
 class BatchPolopt(RLAlgorithm, Poleval):
     """
@@ -339,6 +340,8 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.shutdown_worker()
         if created_session:
             sess.close()
+
+        terminate_running_ec2_instance()
 
     def log_diagnostics(self, paths):
         self.env.log_diagnostics(paths)
