@@ -54,6 +54,8 @@ def get_exp_config(expId, variantIndex):
         config[key] = int(exp['config']['variants'][variantIndex][key])
     for key in VARIANT_KEYS['float']:
         config[key] = float(exp['config']['variants'][variantIndex][key])
+    # Just use experiment id as experiment name for consistency
+    config['exp'] = expId
     return config
 
 
