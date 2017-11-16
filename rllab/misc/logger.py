@@ -41,7 +41,7 @@ structlog.configure(
 logging_logger = logging.getLogger('train_logs')
 logging_logger.setLevel(logging.INFO)
 
-logging_handler = WatchedFileHandler('/home/ubuntu/rllabpp/structlogs.log')
+logging_handler = WatchedFileHandler('/home/ubuntu/rllabpp/data/local/structlogs.log')
 logging_logger.addHandler(logging_handler)
 
 struct_logger = structlog.getLogger('train_logs')
