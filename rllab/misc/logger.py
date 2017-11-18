@@ -260,7 +260,7 @@ def dump_tabular(*args, **kwargs):
                 log(line, *args, **kwargs)
         tabular_dict = dict(_tabular)
         int_keys = ['Iteration', 'MaxLength', 'MinLength', 'NumTrajs']
-        flaot_keys = ['AbsLearnSignal', 'AverageDiscountedReturn', 'AverageReturn',
+        float_keys = ['AbsLearnSignal', 'AverageDiscountedReturn', 'AverageReturn',
             'Entropy', 'ExplainedVariance', 'ItrTime', 'LossAfter', 'LossBefore',
             'MaxReturn', 'MeanKL', 'MeanKLBefore', 'MeanLength', 'MinReturn', 'Perplexity', 'StdReturn', 'Time', 'dLoss']
         struct_log_dict = {}
