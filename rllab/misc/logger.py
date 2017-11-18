@@ -259,8 +259,43 @@ def dump_tabular(*args, **kwargs):
             for line in tabulate(_tabular).split('\n'):
                 log(line, *args, **kwargs)
         tabular_dict = dict(_tabular)
+"""
+              "AbsLearnSignal": "0.802514797974",
+              "AverageDiscountedReturn": "17.3543898733",
+              "AverageReturn": "19.3846153846",
+              "Entropy": "0.66117",
+              "ExplainedVariance": "0.351783803029",
+              "Iteration": "3",
+              "ItrTime": "10.875231742858887",
+              "LossAfter": "-0.0296759",
+              "LossBefore": "-2.93293e-08",
+              "MaxLength": "52",
+              "MaxReturn": "52.0",
+              "MeanKL": "0.00640527",
+              "MeanKLBefore": "-1.15069e-09",
+              "MeanLength": "19.3846153846",
+              "MinLength": "2",
+              "MinReturn": "2.0",
+              "NumTrajs": "52",
+              "Perplexity": "1.93706",
+              "StdReturn": "9.34623298479",
+              "Time": "45.5780930519104",
+              "dLoss": "0.0296759"
+"""
+        int_keys = ['Iteration', 'MaxLength', 'MinLength', 'NumTrajs']
+        flaot_keys = ['AbsLearnSignal', 'AverageDiscountedReturn', 'AverageReturn',
+            'Entropy', 'ExplainedVariance', 'ItrTime', 'LossAfter', 'LossBefore',
+            'MaxReturn', 'MeanKL', 'MeanKLBefore', 'MeanLength', 'MinReturn', 'Perplexity', 'StdReturn', 'Time', 'dLoss']
+        struct_log_dict = {}
+        for keys in tabular_dict.keys():
+            if key in int_keys:
+                struct_log_dict[key] = int(tabular_dict[key])
+            elif key in float_keys:
+                struct_log_dict[key] = float(tabular_dict[key])
+            else: struct_log_dict[key] = tabular_dict[key]
+        
         struct_log.info('rl_log', 
-                        rl_log = tabular_dict
+                        rl_log = struct_log_dict
         )
         # Also write to the csv files
         # This assumes that the keys in each iteration won't change!
