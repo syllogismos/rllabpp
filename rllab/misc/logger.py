@@ -264,7 +264,7 @@ def dump_tabular(*args, **kwargs):
             'Entropy', 'ExplainedVariance', 'ItrTime', 'LossAfter', 'LossBefore',
             'MaxReturn', 'MeanKL', 'MeanKLBefore', 'MeanLength', 'MinReturn', 'Perplexity', 'StdReturn', 'Time', 'dLoss']
         struct_log_dict = {}
-        for keys in tabular_dict.keys():
+        for key in tabular_dict.keys():
             if key in int_keys:
                 struct_log_dict[key] = int(tabular_dict[key])
             elif key in float_keys:
