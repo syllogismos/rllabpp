@@ -107,6 +107,16 @@ class BatchPolopt(RLAlgorithm, Poleval):
         self.expId = kwargs['expId']
         self.variantId = kwargs['variantId']
         self.struct_log = logger.set_struct_logger(self.userId, self.expId, self.variantId)
+        self.struct_log.info('exp_timeline', timeline={
+            "message": "No of iterations in Variant %s is %s" %(self.variantId, self.n_itr),
+            "level": "info",
+            "variant": self.variantId,
+            "iterations": self.n_itr
+        })
+        self.struct_log.info('n_itr', n_itr={
+            "n_itr": self.n_itr,
+            "variant": self.variantId
+        })
         # self.struct_log = logger.get_struct_logger()
         if env.wrapped_env.env_name.startswith('RunEnv'):
             self.difficulty = self.env.wrapped_env.difficulty
@@ -337,6 +347,11 @@ class BatchPolopt(RLAlgorithm, Poleval):
                 itr = sess.run(increment_global_step_op)
                 if self.save_freq > 0 and (itr-1) % self.save_freq == 0: self.save(itr=itr)
 
+        self.struct_log.info('exp_timeline', timeline={
+            "message": "Training done in Variant %s, and machine terminating" %(self.variantId),
+            "level": "info",
+            "variant": self.variantId
+        })
         self.shutdown_worker()
         if created_session:
             sess.close()
