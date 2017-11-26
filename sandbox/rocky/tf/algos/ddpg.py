@@ -417,7 +417,7 @@ class DDPG(RLAlgorithm, Poleval):
 
     def get_epoch_snapshot(self, epoch):
         snapshot = dict(
-            env=self.env,
+            env_name=self.env.wrapped_env.env_name,
             epoch=epoch,
             qf=self.qf,
             target_qf=self.opt_info_critic["target_qf"],

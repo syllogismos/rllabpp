@@ -63,10 +63,13 @@ def get_paths_from_latest_policy(pickled_obj):
     with tf.Session() as sess:
         data = joblib.load(os.path.join(chk_dir, 'params.pkl'))
         policy = data['policy']
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        print("creating env on server")
         env = TfEnv(GymEnv(env_name, difficulty=difficulty,
             runenv_seed=1, visualize=False,
             record_log=False, record_video=False, filter_type=filter_type,
             history_len=history_len, max_obstacles=max_obstacles))
+        print(env.wrapped_env.monitoring, "monitoring state")
         total_length = 0
         paths = []
         # while total_length < batch_size_per_core:
