@@ -14,11 +14,12 @@ from sandbox.rocky.tf.misc.common_utils import pickle_load, pickle_dump
 import gc
 import joblib, pickle
 from sandbox.rocky.tf.algos.poleval import Poleval
-from rllab.sampler.utils import rollout
+from rllab.sampler.utils import rollout, single_rollout
 from runenv.helpers import Scaler
 import urllib, http.client, json
 from runenv.helpers import start_env_server, destroy_env_server
 from escher.helpers import terminate_running_ec2_instance
+import asyncio, aiohttp
 
 class BatchPolopt(RLAlgorithm, Poleval):
     """
@@ -85,6 +86,8 @@ class BatchPolopt(RLAlgorithm, Poleval):
         :return:
         """
         self.env = env
+        self.loop = asyncio.get_event_loop()
+        self.httpClient = aiohttp.ClientSession(loop=self.loop)
         self.policy = policy
         self.baseline = baseline
         self.scope = scope
@@ -175,9 +178,13 @@ class BatchPolopt(RLAlgorithm, Poleval):
     def shutdown_worker(self):
         self.sampler.shutdown_worker()
 
-    def obtain_samples(self, itr):
+    async def monitor_current_itr_env(self, itr):
+        single_rollout(self.env, self.policy, scaler=self.scaler)
+        return
+
+    async def obtain_samples(self, itr):
         pid = start_env_server(self.server_port)
-        conn_str = '127.0.0.1:' + self.server_port
+        conn_str = 'http://127.0.0.1:' + self.server_port
         conn = http.client.HTTPConnection(conn_str)
         conn.set_debuglevel(0)
         headers = {
@@ -194,14 +201,21 @@ class BatchPolopt(RLAlgorithm, Poleval):
             'history_len': self.history_len
             # 'scaler_flag': self.scaler_flag
         }
-        encoded_query = urllib.parse.urlencode(query)
+        # encoded_query = urllib.parse.urlencode(query)
+        url = conn_str + '/get_paths'
         response = None
-        while response != 'OK':
-            conn.request("GET", "/get_paths?" + encoded_query,
-                    headers=headers)
-            res = conn.getresponse()
-            response = json.loads(res.read())['Success']
-            paths = pickle.load(open(os.path.join(logger.get_snapshot_dir(), 'episodes_latest'), 'rb'))
+        async with self.httpClient.get(url, params=query, headers=headers) as resp:
+            assert resp.status == 200
+            response = await resp.read()
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ aio response from client")
+        print(response)
+        paths = pickle.load(open(os.path.join(logger.get_snapshot_dir(), 'episodes_latest'), 'rb'))
+        # while response != 'OK':
+        #     conn.request("GET", "/get_paths?" + encoded_query,
+        #             headers=headers)
+        #     res = conn.getresponse()
+        #     response = json.loads(res.read())['Success']
+        #     paths = pickle.load(open(os.path.join(logger.get_snapshot_dir(), 'episodes_latest'), 'rb'))
         destroy_env_server(pid)
         return paths
         # return self.sampler.obtain_samples(itr)
@@ -279,7 +293,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
                 replacement_prob=self.replacement_prob,
                 env=self.env,
             )
-        self.start_worker()
+        # self.start_worker()
         self.init_opt()
         # This initializes the optimizer parameters
         sess.run(tf.global_variables_initializer())
@@ -293,7 +307,11 @@ class BatchPolopt(RLAlgorithm, Poleval):
             pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
             params = self.get_itr_snapshot(itr, None)
             logger.save_itr_params(itr, params)
-            paths = self.obtain_samples(itr)
+            paths_future = asyncio.ensure_future(self.obtain_samples(itr))
+            all_futures = asyncio.gather(paths_future)
+            self.loop.run_until_complete(all_futures)
+            paths = paths_future.result()
+            # paths = self.obtain_samples(itr)
             unscaled_obs = np.concatenate([p['unscaled_obs'] for p in paths])
             self.scaler.update(unscaled_obs)
             pickle.dump(self.scaler, open(os.path.join(logger.get_snapshot_dir(), 'scaler_latest'), 'wb'))
@@ -312,7 +330,12 @@ class BatchPolopt(RLAlgorithm, Poleval):
             with logger.prefix('itr #%d | ' % itr):
                 logger.log("Mem: %f"%memory_usage_resource())
                 logger.log("Obtaining samples...")
-                paths = self.obtain_samples(itr)
+                paths_future = asyncio.ensure_future(self.obtain_samples(itr))
+                monitor_future = asyncio.ensure_future(self.monitor_current_itr_env(itr))
+                all_futures = asyncio.gather(paths_future, monitor_future)
+                self.loop.run_until_complete(all_futures)
+                paths = paths_future.result()
+                # paths = self.obtain_samples(itr)
                 logger.log("Updating scaler")
                 unscaled_obs = np.concatenate([p['unscaled_obs'] for p in paths])
                 if self.scaler_flag:
@@ -352,7 +375,9 @@ class BatchPolopt(RLAlgorithm, Poleval):
             "level": "info",
             "variant": self.variantId
         })
-        self.shutdown_worker()
+        # self.shutdown_worker()
+        self.loop.close()
+        self.httpClient.close()
         if created_session:
             sess.close()
 

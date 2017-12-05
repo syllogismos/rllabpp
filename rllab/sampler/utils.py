@@ -2,6 +2,24 @@ import numpy as np
 from rllab.misc import tensor_utils
 import time, redis
 
+def single_rollout(env, agent, scaler=None):
+    if scaler is not None:
+        scale, offset = scaler.get()
+    else:
+        scale = [1.0]*env.observation_space.shape[0]
+        offset = [0.0]*env.observation_space.shape[0]
+    o = env.reset()
+    agent.reset()
+    done = False
+    while not done:
+        o = env.observation_space.flatten(o)
+        obs = (o - offset) * scale
+        a, agent_info = agent.get_action(obs)
+        o, r, done, env_info = env.step(a)
+    return
+
+
+
 def rollout(env, agent, max_path_length=np.inf, animated=False, speedup=1,
             always_return_paths=False, scaler=None, redis_conn=None,
             redis_key='None', batch_size=1000000):

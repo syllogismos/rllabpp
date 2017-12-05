@@ -98,7 +98,7 @@ def set_experiment(mode="local", keys=None, params=dict()):
         ans = input("Overwrite %s?: (yes/no)"%log_dir)
         if ans != 'yes': sys.exit(0)
 
-    env = get_env(record_video=False, record_log=False, **flags)
+    env = get_env(record_video=True, record_log=True, **flags)
     policy = get_policy(env=env, info=info, **flags)
     baseline = get_baseline(env=env, **flags)
     qf = get_qf(env=env, info=info, **flags)
