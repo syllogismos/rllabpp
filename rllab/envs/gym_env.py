@@ -107,7 +107,7 @@ class GymEnv(Env, Serializable):
             else:
                 if video_schedule is None:
                     video_schedule = CappedCubicVideoSchedule()
-            if not env_name.startswith('RunEnv'):
+            if not env_name.startswith('RunEnv') and not env_name.startswith('Roboschool'):
                 self.env = gym.wrappers.Monitor(self.env, log_dir, video_callable=lambda x: True, force=True, uid="1")
             self.monitoring = True
 
