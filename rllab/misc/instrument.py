@@ -451,9 +451,10 @@ def run_experiment_lite(
             del task["variant"]
         task["remote_log_dir"] = osp.join(
             config.AWS_S3_PATH, exp_prefix.replace("_", "-"), task["exp_name"])
-        if task.get("seed", None) is not None:
-            task["log_dir"] += "--s-%d"%task["seed"]
-            task["remote_log_dir"] += "--s-%d"%task["seed"]
+        # dont suffix seed to the end of the log dir in escher
+        # if task.get("seed", None) is not None:
+        #     task["log_dir"] += "--s-%d"%task["seed"]
+        #     task["remote_log_dir"] += "--s-%d"%task["seed"]
         task["env"] = task.get("env", dict()) or dict()
         task["env"]["RLLAB_USE_GPU"] = str(use_gpu)
 
