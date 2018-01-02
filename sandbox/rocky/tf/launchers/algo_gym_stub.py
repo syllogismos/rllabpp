@@ -94,6 +94,10 @@ def set_experiment(mode="local", keys=None, params=dict()):
     log_dir = config.LOG_DIR + "/local/" + exp_prefix.replace("_", "-") + "/" + exp_name
     if flags["seed"] is not None:
         log_dir += '--s-%d'%flags["seed"]
+
+    # over writing log_dir to be exp_checkpoint
+    log_dir = config.LOG_DIR + "/local/" + "exp_data"
+
     if not flags["overwrite"] and osp.exists(log_dir):
         ans = input("Overwrite %s?: (yes/no)"%log_dir)
         if ans != 'yes': sys.exit(0)
