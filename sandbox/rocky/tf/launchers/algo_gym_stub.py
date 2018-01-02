@@ -113,6 +113,7 @@ def set_experiment(mode="local", keys=None, params=dict()):
     return algo, dict(
             exp_prefix=exp_prefix,
             exp_name=exp_name,
+            log_dir=log_dir, # setting the log_dir to given log_dir
             mode=mode,
             seed=flags["seed"],
             n_parallel=flags["n_parallel"]
