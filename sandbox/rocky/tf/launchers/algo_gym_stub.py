@@ -98,7 +98,6 @@ def set_experiment(mode="local", keys=None, params=dict()):
     # hardcode exp_prefix and exp_name
     exp_prefix = "escher"
     exp_name = "rl_exp"
-    log_dir = "rl_exp"
 
     if not flags["overwrite"] and osp.exists(log_dir):
         ans = input("Overwrite %s?: (yes/no)"%log_dir)
@@ -115,7 +114,6 @@ def set_experiment(mode="local", keys=None, params=dict()):
     return algo, dict(
             exp_prefix=exp_prefix,
             exp_name=exp_name,
-            log_dir=log_dir, # hardcode exp_prefix, exp_name and log_dir
             mode=mode,
             seed=flags["seed"],
             n_parallel=flags["n_parallel"]
