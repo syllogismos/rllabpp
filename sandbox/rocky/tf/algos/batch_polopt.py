@@ -372,7 +372,7 @@ class BatchPolopt(RLAlgorithm, Poleval):
 
         self.struct_log.info('exp_timeline', timeline={
             "message": "Training done in Variant %s, and machine terminating" %(self.variantId),
-            "level": "info",
+            "level": "danger",
             "variant": self.variantId
         })
         # self.shutdown_worker()
