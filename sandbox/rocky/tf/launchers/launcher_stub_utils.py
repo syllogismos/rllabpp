@@ -464,7 +464,8 @@ def get_algo(env, policy, es, qf, baseline, max_path_length,
             qf_baseline=qf_baseline,
             qf_learning_rate=qf_learning_rate,
             save_freq=save_freq,
-            restore_auto=restore_auto,
+            restore_auto = restore_auto,
+            **extra_kwargs
         )
         algo_class = 'VPG'
     print('[get_algo] Instantiating %s.'%algo_class)
